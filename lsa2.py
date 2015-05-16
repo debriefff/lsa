@@ -3,6 +3,7 @@ import collections
 from stops import STOP_WORDS, EXCLUDE_CHARS
 from nltk.stem import SnowballStemmer
 import numpy as np
+import helpers
 
 
 class LSA(object):
@@ -10,7 +11,7 @@ class LSA(object):
         """
         Args:
            latent_dimensions: numbers of dimensions which provide reliable indexing (but less than number of
-                              indexed words). For visualisation enough 2 dem.
+            indexed words). For visualisation enough 2 dem.
 
         """
 
@@ -21,9 +22,6 @@ class LSA(object):
         self.docs = {}  # keeps documents and their ids
         self.words = []  # keeps indexed words
         self.keys = []  # keeps documents ids может избавиться от них?
-
-    def lower_document(self, document):
-        return document.lower()
 
     def exclude_trash(self, document):
         for char in self.chars_to_exclude:
@@ -40,7 +38,7 @@ class LSA(object):
         return stemmed_words
 
     def prepare_document(self, document):
-        document = self.lower_document(document)
+        document = helpers.lower_document(document)
         document = self.exclude_trash(document)
         document = self.exclude_stops(document)
         document = self.stem_document(document)
@@ -112,6 +110,20 @@ class LSA(object):
             lst[i][i] = S[i]
         self.S = np.matrix(lst)
 
+    def truncate_matrices(self):
+        """ Truncate T, S and D matrices within latent_dimensions number
+            The more dimensions, the bigger influence of 'noises'
+            The less dimensions, the less semantic groups model can find
+
+        """
+
+        self.check_latent_dimensions()
+        self.T = helpers.truncate_columns(self.T, self.latent_dimensions)
+        self.D = helpers.truncate_rows(self.D, self.latent_dimensions)
+
+        self.S = helpers.truncate_rows(self.S, self.latent_dimensions)
+        self.S = helpers.truncate_columns(self.S, self.latent_dimensions)
+
 
 lsa = LSA()
 docs = [
@@ -131,12 +143,10 @@ for d in docs:
 lsa.manage_unique_words()
 lsa.build_base_matrix()
 lsa.svd()
+lsa.truncate_matrices()
 
-print(lsa.base_matrix)
 # print('T:\n', lsa.T)
 # print('S:\n', lsa.S)
 # print('D:\n', lsa.D)
 
-print(lsa.S ** 2)
-
-
+# print(lsa.D*(lsa.S**2)*lsa.D.I)
