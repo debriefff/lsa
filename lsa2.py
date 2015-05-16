@@ -56,7 +56,7 @@ class LSA(object):
                 cnt += counter[word]
             if cnt <= 1:
                 to_remove.append(word)
-        return list(set(self.words) - set(to_remove))
+        self.words = list(set(self.words) - set(to_remove))
 
     def add_document(self, raw_document, document_id=None):
         # here documents is a list with stemmed words
@@ -109,6 +109,9 @@ docs = [
 
 for d in docs:
     lsa.add_document(d)
+print(len(lsa.words))
+lsa.manage_unique_words()
+print(len(lsa.words))
 lsa.build_base_matrix()
 lsa.svd()
 
