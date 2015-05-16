@@ -6,7 +6,15 @@ import numpy as np
 
 
 class LSA(object):
-    def __init__(self):
+    def __init__(self, latent_dimensions=2):
+        """
+        Args:
+           latent_dimensions: numbers of dimensions which provide reliable indexing (but less than number of
+                              indexed words). For visualisation enough 2 dem.
+
+        """
+
+        self.latent_dimensions = latent_dimensions
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
         self.stemmer = SnowballStemmer(language="russian")
@@ -37,6 +45,10 @@ class LSA(object):
         document = self.exclude_stops(document)
         document = self.stem_document(document)
         return document
+
+    def check_latent_dimensions(self):
+        """ Check if entered by user latent dimensions (k) less than number of  """
+        self.latent_dimensions = min(self.latent_dimensions, len(self.words))
 
     def manage_repeating_words(self):
         """ List with indexed words should not have repeated entries """
@@ -69,7 +81,7 @@ class LSA(object):
 
     def build_base_matrix(self):
         """
-        Matrix:
+        Terms-to-documents matrix:
             Rows - indexed words
             Columns - documents
 
@@ -86,12 +98,19 @@ class LSA(object):
                 row.append(counter[word])
             lst.append(row)
 
-        self.base_matrix = np.array(lst)
+        self.base_matrix = np.matrix(lst)
 
     def svd(self):
         """ Singular Value Decomposition of base matrix """
 
-        self.U, self.W, self.V = np.linalg.svd(self.base_matrix, full_matrices=True)
+        self.T, S, self.D = np.linalg.svd(self.base_matrix, full_matrices=True)
+
+        # numpy returns S as flat array of diagonal elements, so:
+        size = len(S)
+        lst = [[0 for x in range(size)] for x in range(size)]
+        for i in range(size):
+            lst[i][i] = S[i]
+        self.S = np.matrix(lst)
 
 
 lsa = LSA()
@@ -109,14 +128,15 @@ docs = [
 
 for d in docs:
     lsa.add_document(d)
-print(len(lsa.words))
 lsa.manage_unique_words()
-print(len(lsa.words))
 lsa.build_base_matrix()
 lsa.svd()
 
 print(lsa.base_matrix)
-print(lsa.base_matrix.shape)
-print('U:\n', lsa.U)
-print('W:\n', lsa.W)
-print('V:\n', lsa.V)
+# print('T:\n', lsa.T)
+# print('S:\n', lsa.S)
+# print('D:\n', lsa.D)
+
+print(lsa.S ** 2)
+
+
