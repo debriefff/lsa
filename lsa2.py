@@ -48,7 +48,15 @@ class LSA(object):
         This helps to save memory
 
         """
-        pass
+        counters = [collections.Counter(self.docs[key]) for key in self.keys]
+        to_remove = []
+        for word in self.words:
+            cnt = 0
+            for counter in counters:
+                cnt += counter[word]
+            if cnt <= 1:
+                to_remove.append(word)
+        return list(set(self.words) - set(to_remove))
 
     def add_document(self, raw_document, document_id=None):
         # here documents is a list with stemmed words
