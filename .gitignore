@@ -5,3 +5,4 @@ literature/
 venv/
 tst*.py
 test*.py
+semantic_space.png

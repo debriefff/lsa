@@ -1,5 +1,6 @@
-# coding: utf-8
+# -*- coding: UTF-8 -*-
 import collections
+from random import choice
 from stops import STOP_WORDS, EXCLUDE_CHARS
 from nltk.stem import SnowballStemmer
 import numpy as np
@@ -21,7 +22,7 @@ class LSA(object):
         self.stemmer = SnowballStemmer(language="russian")
         self.docs = {}  # keeps documents and their ids
         self.words = []  # keeps indexed words
-        self.keys = []  # keeps documents ids может избавиться от них?
+        self.keys = []  # keeps documents ids
 
     def exclude_trash(self, document):
         for char in self.chars_to_exclude:
@@ -32,7 +33,8 @@ class LSA(object):
         return ' '.join([word for word in document.split(' ') if word not in self.stop_words])
 
     def stem_document(self, document, return_text=False):
-        stemmed_words = [self.stemmer.stem(w) for w in document.split(' ')]
+        # we need if w to avoid empty strings in results
+        stemmed_words = [self.stemmer.stem(w) for w in document.split(' ') if w]
         if return_text:
             return ' '.join(stemmed_words)
         return stemmed_words
@@ -101,10 +103,12 @@ class LSA(object):
     def svd(self):
         """ Singular Value Decomposition of base matrix """
 
-        self.T, S, self.D = np.linalg.svd(self.X, full_matrices=True)
+        T, S, D = np.linalg.svd(self.X, full_matrices=True)
 
-        # numpy returns S as flat array of diagonal elements, so:
-        self.S = np.diag(S)
+        # numpy returns S as flat array of diagonal elements (+ round):
+        self.T = T.round(decimals=2)
+        self.S = np.diag(S).round(decimals=2)
+        self.D = D.round(decimals=2)
 
     def truncate_matrices(self):
         """ Truncate T, S and D matrices within latent_dimensions number
@@ -122,4 +126,51 @@ class LSA(object):
         self.S = helpers.truncate_columns(self.S, self.latent_dimensions)
 
     def recalculate_base_matrix(self):
-        self.X = self.T * self.S * self.D
+        """ Rebuilding matrix X after truncating T, S and D """
+
+        self.X = (self.T * self.S * self.D).round(decimals=2)
+
+    def build_semantic_space(self, manage_unique=True):
+        if manage_unique:
+            self.manage_unique_words()
+        self.build_base_matrix()
+        self.svd()
+        self.truncate_matrices()
+        self.recalculate_base_matrix()
+
+    def draw_semantic_space(self, file_name='semantic_space.png'):
+        import matplotlib.pyplot as plt
+        from matplotlib import rc
+
+        font = {'family': 'Verdana', 'weight': 'normal'}
+        rc('font', **font)
+
+        # coordinates of words
+        words_coords = self.T.tolist()
+        x = [x for [x, y] in words_coords]
+        y = [y for [x, y] in words_coords]
+
+        # coordinates of documents
+        docs_coords = self.D.T.tolist()
+        x1 = [x for [x, y] in docs_coords]
+        y1 = [y for [x, y] in docs_coords]
+
+        fig, ax = plt.subplots()
+        plt.title('Семантическое пространство')
+        # plt.xlabel(u'D1')
+        # plt.ylabel(u'D2')
+        ax.spines['bottom'].set_position('center')
+        ax.spines['left'].set_position('center')
+        ax.spines['top'].set_color('none')
+        ax.spines['right'].set_color('none')
+        plt.plot(x, y, 'ro', x1, y1, 'bs')
+        for i, word in enumerate(self.words):
+            ax.annotate(word, xy=(x[i], y[i]), xytext=(5, 5), textcoords='offset points', ha='left',
+                        va=choice(['bottom', 'top']))
+        for i, key in enumerate(self.keys):
+            print(x1[i], y1[i], 'T%s' % key)
+            print(self.docs[key])
+            ax.annotate('T%s' % key, xy=(x1[i], y1[i]), xytext=(5, 5), textcoords='offset points', ha='left',
+                        va=choice(['bottom', 'top']))
+
+        fig.savefig(file_name)
