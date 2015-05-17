@@ -45,8 +45,8 @@ class LSA(object):
         return document
 
     def check_latent_dimensions(self):
-        """ Check if entered by user latent dimensions (k) less than number of  """
-        self.latent_dimensions = min(self.latent_dimensions, len(self.words))
+        """ Check if entered by user latent dimensions (k) less than number of indexed words and documents """
+        self.latent_dimensions = min(self.latent_dimensions, len(self.words), len(self.keys))
 
     def manage_repeating_words(self):
         """ List with indexed words should not have repeated entries """
@@ -123,30 +123,3 @@ class LSA(object):
 
     def recalculate_base_matrix(self):
         self.X = self.T * self.S * self.D
-
-
-lsa = LSA()
-docs = [
-    "Британская полиция знает о местонахождении основателя WikiLeaks",
-    "В суде США начинается процесс против россиянина, рассылавшего спам",
-    "Церемонию вручения Нобелевской премии мира бойкотируют 19 стран",
-    "В Великобритании арестован основатель сайта Wikileaks Джулиан Ассандж",
-    "Украина игнорирует церемонию вручения Нобелевской премии",
-    "Шведский суд отказался рассматривать апелляцию основателя Wikileaks",
-    "НАТО и США разработали планы обороны стран Балтии против России",
-    "Полиция Великобритании нашла основателя WikiLeaks, но, не арестовала",
-    "В Стокгольме и Осло сегодня состоится вручение Нобелевских премий"
-]
-
-for d in docs:
-    lsa.add_document(d)
-lsa.manage_unique_words()
-lsa.build_base_matrix()
-lsa.svd()
-lsa.truncate_matrices()
-lsa.recalculate_base_matrix()
-
-print('T:\n', lsa.T)
-print('S:\n', lsa.S)
-print('D:\n', lsa.D)
-print(lsa.X)
