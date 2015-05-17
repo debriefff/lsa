@@ -96,19 +96,15 @@ class LSA(object):
                 row.append(counter[word])
             lst.append(row)
 
-        self.base_matrix = np.matrix(lst)
+        self.X = np.matrix(lst)
 
     def svd(self):
         """ Singular Value Decomposition of base matrix """
 
-        self.T, S, self.D = np.linalg.svd(self.base_matrix, full_matrices=True)
+        self.T, S, self.D = np.linalg.svd(self.X, full_matrices=True)
 
         # numpy returns S as flat array of diagonal elements, so:
-        size = len(S)
-        lst = [[0 for x in range(size)] for x in range(size)]
-        for i in range(size):
-            lst[i][i] = S[i]
-        self.S = np.matrix(lst)
+        self.S = np.diag(S)
 
     def truncate_matrices(self):
         """ Truncate T, S and D matrices within latent_dimensions number
@@ -118,11 +114,15 @@ class LSA(object):
         """
 
         self.check_latent_dimensions()
+
         self.T = helpers.truncate_columns(self.T, self.latent_dimensions)
         self.D = helpers.truncate_rows(self.D, self.latent_dimensions)
 
         self.S = helpers.truncate_rows(self.S, self.latent_dimensions)
         self.S = helpers.truncate_columns(self.S, self.latent_dimensions)
+
+    def recalculate_base_matrix(self):
+        self.X = self.T * self.S * self.D
 
 
 lsa = LSA()
@@ -144,9 +144,9 @@ lsa.manage_unique_words()
 lsa.build_base_matrix()
 lsa.svd()
 lsa.truncate_matrices()
+lsa.recalculate_base_matrix()
 
-# print('T:\n', lsa.T)
-# print('S:\n', lsa.S)
-# print('D:\n', lsa.D)
-
-# print(lsa.D*(lsa.S**2)*lsa.D.I)
+print('T:\n', lsa.T)
+print('S:\n', lsa.S)
+print('D:\n', lsa.D)
+print(lsa.X)
