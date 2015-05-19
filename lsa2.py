@@ -1,14 +1,16 @@
 # -*- coding: UTF-8 -*-
 import collections
+import operator
 from random import choice
 from stops import STOP_WORDS, EXCLUDE_CHARS
 from nltk.stem import SnowballStemmer
+from scipy.spatial import distance
 import numpy as np
 import helpers
 
 
 class LSA(object):
-    def __init__(self, latent_dimensions=2):
+    def __init__(self, latent_dimensions=3):
         """
         Args:
            latent_dimensions: numbers of dimensions which provide reliable indexing (but less than number of
@@ -30,6 +32,7 @@ class LSA(object):
         return document
 
     def exclude_stops(self, document):
+        # TODO: здесь не текст возвращать, а list
         return ' '.join([word for word in document.split(' ') if word not in self.stop_words])
 
     def stem_document(self, document, return_text=False):
@@ -73,7 +76,7 @@ class LSA(object):
     def add_document(self, raw_document, document_id=None):
         # here documents is a list with stemmed words
         document = self.prepare_document(raw_document)
-        key = document_id or len(self.docs) + 1  # проверять уникальность ключей
+        key = document_id or len(self.docs)  # проверять уникальность ключей
         self.keys.append(key)
         self.docs[key] = document
         self.words.extend(document)
@@ -93,7 +96,7 @@ class LSA(object):
         for word in self.words:
             row = []
             for key in self.keys:
-                # Можно не создавать на каждом шаге объекты-счетчики, сделать это только один раз
+                # TODO: Можно не создавать на каждом шаге объекты-счетчики, сделать это только один раз
                 counter = collections.Counter(self.docs[key])
                 row.append(counter[word])
             lst.append(row)
@@ -106,9 +109,9 @@ class LSA(object):
         T, S, D = np.linalg.svd(self.X, full_matrices=True)
 
         # numpy returns S as flat array of diagonal elements (+ round):
-        self.T = T.round(decimals=2)
-        self.S = np.diag(S).round(decimals=2)
-        self.D = D.round(decimals=2)
+        self.T = np.matrix(T.round(decimals=2))
+        self.S = np.matrix(np.diag(S).round(decimals=2))
+        self.D = np.matrix(D.round(decimals=2))
 
     def truncate_matrices(self):
         """ Truncate T, S and D matrices within latent_dimensions number
@@ -128,7 +131,7 @@ class LSA(object):
     def recalculate_base_matrix(self):
         """ Rebuilding matrix X after truncating T, S and D """
 
-        self.X = (self.T * self.S * self.D).round(decimals=2)
+        self.X = np.matrix((self.T * self.S * self.D).round(decimals=2))
 
     def build_semantic_space(self, manage_unique=True):
         if manage_unique:
@@ -168,9 +171,68 @@ class LSA(object):
             ax.annotate(word, xy=(x[i], y[i]), xytext=(5, 5), textcoords='offset points', ha='left',
                         va=choice(['bottom', 'top']))
         for i, key in enumerate(self.keys):
-            print(x1[i], y1[i], 'T%s' % key)
-            print(self.docs[key])
             ax.annotate('T%s' % key, xy=(x1[i], y1[i]), xytext=(5, 5), textcoords='offset points', ha='left',
                         va=choice(['bottom', 'top']))
 
         fig.savefig(file_name)
+
+    def make_semantic_space_coords_for_new_doc(self, new_document):
+        """ We consider that semantic space is ready. Calculate new_document coordinates in it
+            :param
+                new_document:
+                    cleared from trash document (optionally stemmed)
+
+            :returns
+             None if all words in the document are not in the space
+
+             Dq: np.array (this is like column of self.D)
+             Size Dq: 1 x self.latent_dimensions
+
+        """
+
+        doc_word_positions = []
+        for word in new_document:
+            try:
+                word_pos = self.words.index(word)
+                doc_word_positions.append(word_pos)
+            except ValueError:
+                continue
+        if not doc_word_positions:
+            return None
+
+        # Xq is a term-vector of retrieval query q in semantic space. Its size: 1 x, t - number of terms in the space
+        # If term is in the query its coordinate 1, else 0. Simple!
+        Xq = [1 if x in doc_word_positions else 0 for x in range(len(self.words))]
+        Dq = np.matrix(Xq) * self.T * self.S.I
+        return np.array(Dq.tolist()[0])
+
+    def find_similar_documents(self, doc_coords, limit=100):
+        """  Calculate cosine distances between docs and the given doc
+        :param
+            doc_coords:
+                np.array with coordinates of given document
+            limit:
+                how many results (documents ids) to return
+        :returns
+            A sorted tuple with ids of relevant documents. The most relevant doc is the first
+        """
+
+        distances = [(self.keys[i], distance.cosine(helpers.get_matrix_column(self.D, i), doc_coords)) for i in
+                     range(self.D.shape[1])]
+
+        sorted_distanses = sorted(distances, key=operator.itemgetter(1))
+        result = [doc_id for doc_id, dist in sorted_distanses[:limit]]
+        return result
+
+    def search(self, query, limit=100):
+        """ We consider that retrieval query is like a new document.
+            Calculate coordinates and compare with other docs
+        """
+
+        q = self.prepare_document(query)
+        pd_coords = self.make_semantic_space_coords_for_new_doc(q)
+        if pd_coords is None:
+            print('No one word from query is in semantic space')
+            return None
+        return self.find_similar_documents(pd_coords, limit)
+
