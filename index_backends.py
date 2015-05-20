@@ -1,0 +1,2 @@
+class JsonBackend():
+    pass
