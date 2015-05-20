@@ -31,5 +31,17 @@ def get_matrix_column(matrix, n):
     return matrix[:, n].flatten().tolist()[0]
 
 
+def insert_column_to_matrix(matrix, to_insrt):
+    """ Insert column into nampy matrix
+
+    Returns:
+        type of return object - numpy.matrix
+    """
+
+    tmp = matrix.T.tolist()
+    tmp.append(to_insrt)
+    return np.matrix(tmp).T
+
+
 def lower_document(document):
     return document.lower()

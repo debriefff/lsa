@@ -7,6 +7,7 @@ from nltk.stem import SnowballStemmer
 from scipy.spatial import distance
 import numpy as np
 import helpers
+import exceptions
 
 
 class LSA(object):
@@ -51,15 +52,16 @@ class LSA(object):
 
     def check_latent_dimensions(self):
         """ Check if entered by user latent dimensions (k) less than number of indexed words and documents """
+
         self.latent_dimensions = min(self.latent_dimensions, len(self.words), len(self.keys))
 
     def manage_repeating_words(self):
         """ List with indexed words should not have repeated entries """
+
         self.words = list(set(self.words))
 
     def manage_unique_words(self):
-        """
-        If some word has only one entry in documents we can leave it.
+        """ If some word has only one entry in documents we can leave it.
         This helps to save memory
 
         """
@@ -73,14 +75,50 @@ class LSA(object):
                 to_remove.append(word)
         self.words = list(set(self.words) - set(to_remove))
 
-    def add_document(self, raw_document, document_id=None):
-        # here documents is a list with stemmed words
+    def check_doc_key(self, desired_id):
+        """ Returns key that will indicate the document in space. This key will be returns by search method.
+            If external document_id is given ist uniqueness will be checked, if not - returns max existed id + 1
+
+            :param
+             desired_id: int value or None! (to save memory)
+        """
+
+        if desired_id is not None:
+            if not isinstance(desired_id, int):
+                raise exceptions.KeyTypeException(desired_id)
+            if desired_id in self.keys:
+                raise exceptions.UniqueKeyException(desired_id)
+            return desired_id
+
+        try:
+            key = max(self.keys) + 1
+        # if sequence is empty
+        except ValueError:
+            key = 0
+        return key
+
+    def add_document(self, raw_document, desired_id=None):
+        """ Adds given document in semantic space
+
+        :param
+         raw_document - plain text
+         desired_id - external id which programmer wants to associate this the raw document
+
+        :return
+         key - key which will be associated with document. Will be created if desired_id is None
+        """
+
+        # TODO: Добавить параметр force для замены существующего документа на новый.
+        # TODO: а сохранение контента - проблема тех, кто будет юзать
+
+        #  here documents is a list with stemmed words
         document = self.prepare_document(raw_document)
-        key = document_id or len(self.docs)  # проверять уникальность ключей
+        key = self.check_doc_key(desired_id)
         self.keys.append(key)
         self.docs[key] = document
         self.words.extend(document)
         self.manage_repeating_words()
+        return key
 
     def build_base_matrix(self):
         """
@@ -88,7 +126,7 @@ class LSA(object):
             Rows - indexed words
             Columns - documents
 
-        At the intersection - how many times the word entry in the text
+        At the intersection - how many times the word entries in the text
 
         """
 
@@ -204,7 +242,7 @@ class LSA(object):
         # If term is in the query its coordinate 1, else 0. Simple!
         Xq = [1 if x in doc_word_positions else 0 for x in range(len(self.words))]
         Dq = np.matrix(Xq) * self.T * self.S.I
-        return np.array(Dq.tolist()[0])
+        return np.array(Dq.tolist()[0]).round(decimals=2)
 
     def find_similar_documents(self, doc_coords, limit=100):
         """  Calculate cosine distances between docs and the given doc
@@ -229,6 +267,7 @@ class LSA(object):
             Calculate coordinates and compare with other docs
         """
 
+        # TODO добавить функционал возвращения идентификаторов с диставниями
         q = self.prepare_document(query)
         pd_coords = self.make_semantic_space_coords_for_new_doc(q)
         if pd_coords is None:
@@ -236,3 +275,15 @@ class LSA(object):
             return None
         return self.find_similar_documents(pd_coords, limit)
 
+    def update_space_with_document(self, document, desired_id=None):
+        """ Folding-in a new document into semantic space
+            See add_document method for params and returns info
+        """
+
+        clear_doc = self.prepare_document(document)
+        doc_coords = self.make_semantic_space_coords_for_new_doc(clear_doc)
+        new_key = self.check_doc_key(desired_id)
+        self.keys.append(new_key)
+        self.D = helpers.insert_column_to_matrix(self.D, doc_coords)
+
+        return new_key
