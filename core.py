@@ -11,14 +11,15 @@ import exceptions
 
 
 class LSA(object):
-    def __init__(self, latent_dimensions=3):
+    def __init__(self, latent_dimensions):
         """
         Args:
            latent_dimensions: numbers of dimensions which provide reliable indexing (but less than number of
             indexed words). For visualisation enough 2 dem.
 
         """
-
+        # TODO: ввести параметр окрегления координат (сейчас 2 цифры после запятой)
+        # TODO: ввести параметр юзать стемминг или нет
         self.latent_dimensions = latent_dimensions
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
@@ -33,12 +34,11 @@ class LSA(object):
         return document
 
     def exclude_stops(self, document):
-        # TODO: здесь не текст возвращать, а list
-        return ' '.join([word for word in document.split(' ') if word not in self.stop_words])
+        return [word for word in document.split(' ') if word not in self.stop_words]
 
     def stem_document(self, document, return_text=False):
         # we need if w to avoid empty strings in results
-        stemmed_words = [self.stemmer.stem(w) for w in document.split(' ') if w]
+        stemmed_words = [self.stemmer.stem(w) for w in document if w]
         if return_text:
             return ' '.join(stemmed_words)
         return stemmed_words
@@ -111,7 +111,7 @@ class LSA(object):
         # TODO: Добавить параметр force для замены существующего документа на новый.
         # TODO: а сохранение контента - проблема тех, кто будет юзать
 
-        #  here documents is a list with stemmed words
+        # here documents is a list with stemmed words
         document = self.prepare_document(raw_document)
         key = self.check_doc_key(desired_id)
         self.keys.append(key)
@@ -177,9 +177,10 @@ class LSA(object):
         self.build_base_matrix()
         self.svd()
         self.truncate_matrices()
-        self.recalculate_base_matrix()
+        self.recalculate_base_matrix()  # TODO: нужно ли, боольше она не используется
 
     def draw_semantic_space(self, file_name='semantic_space.png'):
+        # TODO: ПОднимать исключения, если k > 2, ибо мы тогда не нарисуем
         import matplotlib.pyplot as plt
         from matplotlib import rc
 
