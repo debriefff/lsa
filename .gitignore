@@ -6,3 +6,5 @@ venv/
 tst*.py
 test*.py
 semantic_space.png
+/fill
+little.db

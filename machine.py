@@ -15,8 +15,16 @@ class SearchMachine():
 
         self.lsa = core.LSA(self.latent_dimensions)
 
-    def feed_from_db(self):
-        pass
+    def feed_from_db(self, tables_info):
+        # 'credentials' : { все для соединения в БД }
+        # 'tables_info': {'table_name_1': {'fields': ('fname1', 'fname2', ...), 'pk': 'pk_field_name'}, 'table_name_2':{...}}
+
+        for table in tables_info:
+            rows = self.db_backend.select(table, tables_info[table]['fields'], tables_info[table]['pk_field_name'])
+            for row in rows:
+                document = ' '.join([row[i] for i in range(1, len(tables_info[table]['fields']))])
+                print(document)
+                self.feed_with_document(document, row[0])
 
     def feed_with_document(self, raw_document, desired_id):
         """ Give individual document to LSA algorithm """

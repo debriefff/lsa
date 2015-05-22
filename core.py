@@ -83,6 +83,7 @@ class LSA(object):
              desired_id: int value or None! (to save memory)
         """
 
+        # TODO: desired_id может быть числом, но переданным как строка, немного другая проверка нид
         if desired_id is not None:
             if not isinstance(desired_id, int):
                 raise exceptions.KeyTypeException(desired_id)
