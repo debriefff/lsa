@@ -4,6 +4,10 @@ import pymysql.cursors
 
 
 class DataBaseBackend(object):
+    def make_select_sql(self, table_name, fields, pk_field_name):
+        query_fields = [pk_field_name] + list(fields)
+        return "SELECT %(fields)s FROM %(table)s;" % {'fields': ','.join(query_fields), 'table': table_name}
+
     def select(self, table_name, fields, pk_field_name):
         raise NotImplemented
 
@@ -22,9 +26,7 @@ class MySQLBackend(DataBaseBackend):
     def select(self, table_name, fields, pk_field_name):
         connection = pymysql.connect(host=self.host, user=self.user, passwd=self.password, db=self.db_name,
                                      charset=self.charset, cursorclass=pymysql.cursors.Cursor)
-
-        query_fields = [pk_field_name] + list(fields)
-        query = "SELECT %(fields)s FROM %(table)s;" % {'fields': ','.join(query_fields), 'table': table_name}
+        query = self.make_select_sql(table_name, fields, pk_field_name)
 
         try:
             with connection.cursor() as cursor:
@@ -46,11 +48,12 @@ class SQLiteBackend(DataBaseBackend):
             raise exceptions.DBImproperlyConfigured(credentials)
 
     def select(self, table_name, fields, pk_field_name):
+        query = self.make_select_sql(table_name, fields, pk_field_name)
         connection = sqlite3.connect(self.db_name)
-        cursor = connection.cursor()
-        query_fields = [pk_field_name] + list(fields)
-        query = "SELECT %(fields)s FROM %(table)s;" % {'fields': ','.join(query_fields), 'table': table_name}
-        cursor.execute(query)
-        res = cursor.fetchall()
-        connection.close()
+        try:
+            cursor = connection.cursor()
+            cursor.execute(query)
+            res = cursor.fetchall()
+        finally:
+            connection.close()
         return res
