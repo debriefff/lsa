@@ -1,4 +1,5 @@
 import numpy as np
+import importlib
 
 
 def truncate_columns(matrix, limit):
@@ -45,3 +46,14 @@ def insert_column_to_matrix(matrix, to_insrt):
 
 def lower_document(document):
     return document.lower()
+
+
+def import_from_package_and_module(path):
+    """ Import via path like my_package.my_module.my_class
+        It will return my_class object (class obj, not instance)
+    """
+    parts = path.split('.')
+    cls_name, other = parts[-1], '.'.join(parts[:-1])
+    mod = importlib.import_module(other)
+    return getattr(mod, cls_name)
+

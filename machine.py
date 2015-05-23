@@ -1,13 +1,19 @@
 import core
+import helpers
 import index_backends
 
 
+# db.mysql.MySQLBackend
+# db.postgres.PostgreSQLBackend
+# db.sqlite.SQLiteBackend
+
 class SearchMachine():
-    def __init__(self, latent_dimensions, db_backend='mysq', index_backend='json', manage_unique=True,
+    def __init__(self, latent_dimensions, db_backend='db.sqlite.SQLiteBackend', index_backend='json', manage_unique=True,
                  db_credentials=None, tables_info=None):
         self.latent_dimensions = latent_dimensions
         self.manage_unique = manage_unique
-        self.db_backend = None  # импорт класса по имени, ичхося их строкового входного параметра
+        self.db_backend = helpers.import_from_package_and_module(db_backend)(**db_credentials)
+        print(self.db_backend)
         self.index_backend = None
         self.tables_info = tables_info
 
