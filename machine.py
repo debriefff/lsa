@@ -4,11 +4,13 @@ import index_backends
 
 
 class SearchMachine():
-    def __init__(self, latent_dimensions, db_backend='mysq', index_backend='json', manage_unique=True):
+    def __init__(self, latent_dimensions, db_backend='mysq', index_backend='json', manage_unique=True,
+                 db_credentials=None, tables_info=None):
         self.latent_dimensions = latent_dimensions
         self.manage_unique = manage_unique
-        self.db_backend = None  # тут будет функция, которая вернет инстанс класса, ичходя их строкового параметра
+        self.db_backend = None  # импорт класса по имени, ичхося их строкового входного параметра
         self.index_backend = None
+        self.tables_info = tables_info
 
     def init_lsa(self):
         """ Create LSA instance not from dump """
