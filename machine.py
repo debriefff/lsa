@@ -1,5 +1,4 @@
 import core
-import db_backends
 import index_backends
 
 
