@@ -19,10 +19,9 @@ class SearchMachine():
     KEYS_INDEX_NAME = 'keys.json'
 
     def __init__(self, latent_dimensions, index_backend, keep_index_info, default_search_limit=100, db_backend=None,
-                 db_credentials=None, tables_info=None, manage_unique=True, keep_in_memory=False):
+                 db_credentials=None, tables_info=None, manage_unique=True):
         self.lsa = None
         self.default_search_limit = default_search_limit
-        self.keep_in_memory = keep_in_memory
         self.latent_dimensions = latent_dimensions
         self.manage_unique = manage_unique
         if db_backend and db_credentials and tables_info:
@@ -87,8 +86,7 @@ class SearchMachine():
         self.build_semantic_space()
         self.dump_semantic_space()
 
-        if not self.keep_in_memory:
-            self.deinit_lsa()
+        self.deinit_lsa()
 
     def remove_index(self):
         self.deinit_lsa()
@@ -105,8 +103,7 @@ class SearchMachine():
 
         result = self.lsa.search(query, limit=limit or self.default_search_limit)
 
-        if not self.keep_in_memory:
-            self.deinit_lsa()
+        self.deinit_lsa()
         return result
 
     def update_index_with_doc(self, document, desired_id=None):
@@ -117,8 +114,7 @@ class SearchMachine():
 
         new_key = self.lsa.update_space_with_document(document, desired_id)
 
-        if not self.keep_in_memory:
-            self.deinit_lsa()
+        self.deinit_lsa()
         return new_key
 
     def draw_space(self, **kwargs):
@@ -127,5 +123,4 @@ class SearchMachine():
 
         self.lsa.draw_semantic_space(self, **kwargs)
 
-        if not self.keep_in_memory:
-            self.deinit_lsa()
+        self.deinit_lsa()
