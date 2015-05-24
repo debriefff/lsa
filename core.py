@@ -25,9 +25,12 @@ class LSA(object):
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
         self.stemmer = SnowballStemmer(language="russian")
-        self.docs = {}  # keeps documents and their ids
+        self.docs = {}  # keeps documents and their ids  TODO: чистить, как только становится ненужным
         self.words = []  # keeps indexed words
         self.keys = []  # keeps documents ids
+
+    def clear_self_docs(self):
+        self.docs = {}
 
     def exclude_trash(self, document):
         for char in self.chars_to_exclude:
@@ -108,9 +111,6 @@ class LSA(object):
          key - key which will be associated with document. Will be created if desired_id is None
         """
 
-        # TODO: Добавить параметр force для замены существующего документа на новый.
-        # TODO: а сохранение контента - проблема тех, кто будет юзать
-
         # here documents is a list with stemmed words
         document = self.prepare_document(raw_document)
         key = self.check_doc_key(desired_id)
@@ -166,21 +166,18 @@ class LSA(object):
         self.S = helpers.truncate_rows(self.S, self.latent_dimensions)
         self.S = helpers.truncate_columns(self.S, self.latent_dimensions)
 
-    def recalculate_base_matrix(self):
-        """ Rebuilding matrix X after truncating T, S and D """
-
-        self.X = np.matrix((self.T * self.S * self.D).round(decimals=self.decimals))
-
     def build_semantic_space(self, manage_unique=True):
         if manage_unique:
             self.manage_unique_words()
         self.build_base_matrix()
+        self.clear_self_docs()
         self.svd()
         self.truncate_matrices()
-        self.recalculate_base_matrix()  # TODO: нужно ли, боольше она не используется
 
     def draw_semantic_space(self, file_name='semantic_space.png'):
-        # TODO: ПОднимать исключения, если k > 2, ибо мы тогда не нарисуем
+        if self.latent_dimensions > 2:
+            raise exceptions.TooManyDimensionsToDraw
+
         import matplotlib.pyplot as plt
         from matplotlib import rc
 
@@ -268,7 +265,7 @@ class LSA(object):
             Calculate coordinates and compare with other docs
         """
 
-        # TODO добавить функционал возвращения идентификаторов с диставниями
+        # TODO добавить функционал возвращения идентификаторов с дистанциями
         q = self.prepare_document(query)
         pd_coords = self.make_semantic_space_coords_for_new_doc(q)
         if pd_coords is None:

@@ -25,3 +25,8 @@ class DBImproperlyConfigured(Exception):
 class DBBackendIsNotConfigured(Exception):
     def __str__(self):
         return u'No any db settings provided'
+
+
+class TooManyDimensionsToDraw(Exception):
+    def __str__(self):
+        return u'Method draw_semantic_space can be only used if latent_dimensions = 2'
