@@ -83,10 +83,7 @@ class LSA(object):
              desired_id: int value or None! (to save memory)
         """
 
-        # TODO: desired_id может быть строкой, это норм
         if desired_id is not None:
-            if not isinstance(desired_id, int):
-                raise exceptions.KeyTypeException(desired_id)
             if desired_id in self.keys:
                 raise exceptions.UniqueKeyException(desired_id)
             return desired_id

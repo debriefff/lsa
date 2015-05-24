@@ -9,8 +9,8 @@ class SQLiteBackend(base.DataBaseBackend):
         if self.db_name is None:
             raise exceptions.DBImproperlyConfigured(credentials)
 
-    def select(self, table_name, fields, pk_field_name):
-        query = self.make_select_sql(table_name, fields, pk_field_name)
+    def select(self, table_name, fields, pk_field_name, where_clause):
+        query = self.make_select_sql(table_name, fields, pk_field_name, where_clause)
         connection = sqlite3.connect(self.db_name)
         try:
             cursor = connection.cursor()

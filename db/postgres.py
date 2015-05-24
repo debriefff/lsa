@@ -13,11 +13,10 @@ class PostgreSQLBackend(base.DataBaseBackend):
         if self.db_name is None or self.user is None or self.password is None:
             raise exceptions.DBImproperlyConfigured
 
-    def select(self, table_name, fields, pk_field_name):
-
+    def select(self, table_name, fields, pk_field_name, where_clause):
         connection = psycopg2.connect(
             "dbname=%s user=%s password=%s host=%s" % (self.db_name, self.user, self.password, self.host))
-        query = self.make_select_sql(table_name, fields, pk_field_name)
+        query = self.make_select_sql(table_name, fields, pk_field_name, where_clause)
 
         try:
             cursor = connection.cursor()

@@ -14,10 +14,10 @@ class MySQLBackend(base.DataBaseBackend):
         if self.db_name is None or self.user is None or self.password is None:
             raise exceptions.DBImproperlyConfigured
 
-    def select(self, table_name, fields, pk_field_name):
+    def select(self, table_name, fields, pk_field_name, where_clause):
         connection = pymysql.connect(host=self.host, user=self.user, passwd=self.password, db=self.db_name,
                                      charset=self.charset, cursorclass=pymysql.cursors.Cursor)
-        query = self.make_select_sql(table_name, fields, pk_field_name)
+        query = self.make_select_sql(table_name, fields, pk_field_name, where_clause)
 
         try:
             with connection.cursor() as cursor:

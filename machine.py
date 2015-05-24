@@ -43,19 +43,20 @@ class SearchMachine():
 
     def feed_from_db(self):
         # 'credentials' : { все для соединения в БД }
-        # 'tables_info': {'table_name_1': {'fields': ('fname1', 'fname2', ...), 'pk_field_name': 'pk_field_name'}, 'table_name_2':{...}}
+        # 'tables_info': {'table_name_1': {'fields': ('fname1', 'fname2', ...), 'pk_field_name': 'pk_field_name', 'prefix': 'd_', 'where': '...'}, 'table_name_2':{...}}
 
         if not hasattr(self, 'db_backend'):
             raise exceptions.DBBackendIsNotConfigured
-        # TODO: прификсы для таблиц, которые будут прибавляться к первичным ключам.
-        # TODO: добавить where условие в запрос
 
         for table in self.tables_info:
+            where_clause = self.tables_info[table].get('where', None)
             rows = self.db_backend.select(table, self.tables_info[table]['fields'],
-                                          self.tables_info[table]['pk_field_name'])
+                                          self.tables_info[table]['pk_field_name'], where_clause)
+            table_prefix = self.tables_info[table].get('prefix', None)
             for row in rows:
                 document = ' '.join([row[i] for i in range(1, 1 + len(self.tables_info[table]['fields']))])
-                self.feed_with_document(document, row[0])
+                desired_id = table_prefix + str(row[0]) if table_prefix else row[0]
+                self.feed_with_document(document, desired_id)
 
     def feed_with_document(self, raw_document, desired_id=None):
         """ Give individual document to LSA algorithm """

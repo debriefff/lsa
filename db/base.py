@@ -1,7 +1,11 @@
 class DataBaseBackend(object):
-    def make_select_sql(self, table_name, fields, pk_field_name):
+    def make_select_sql(self, table_name, fields, pk_field_name, where_clause=None):
         query_fields = [pk_field_name] + list(fields)
-        return "SELECT %(fields)s FROM %(table)s;" % {'fields': ','.join(query_fields), 'table': table_name}
+        where = "WHERE %s" % where_clause if where_clause else ''
+        query = "SELECT %(fields)s FROM %(table)s %(where)s;" % {'fields': ','.join(query_fields), 'table': table_name,
+                                                                  'where': where}
+        print(query)
+        return query
 
-    def select(self, table_name, fields, pk_field_name):
+    def select(self, table_name, fields, pk_field_name, where_clause):
         raise NotImplemented
