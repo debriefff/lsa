@@ -3,6 +3,8 @@ import core
 import helpers
 import exceptions
 
+from decorators import with_manage_lsa_instance
+
 # db.mysql.MySQLBackend
 # db.postgres.PostgreSQLBackend
 # db.sqlite.SQLiteBackend
@@ -96,31 +98,18 @@ class SearchMachine():
         self.remove_index()
         self.build_index()
 
-    # TODO: некрасивые что-то следующие три метода, декоратор, имхо, нужен
+    @with_manage_lsa_instance
     def search(self, query, limit=None):
-        if not self.lsa:
-            self.load_space_from_dump()
+        return self.lsa.search(query, limit=limit or self.default_search_limit)
 
-        result = self.lsa.search(query, limit=limit or self.default_search_limit)
-
-        self.deinit_lsa()
-        return result
-
+    @with_manage_lsa_instance
     def update_index_with_doc(self, document, desired_id=None):
         """ Use it to add a new document to already existed semantic space """
 
-        if not self.lsa:
-            self.load_space_from_dump()
+        ney_key = self.lsa.update_space_with_document(document, desired_id)
+        self.dump_semantic_space()
+        return ney_key
 
-        new_key = self.lsa.update_space_with_document(document, desired_id)
-
-        self.deinit_lsa()
-        return new_key
-
+    @with_manage_lsa_instance
     def draw_space(self, **kwargs):
-        if not self.lsa:
-            self.load_space_from_dump()
-
         self.lsa.draw_semantic_space(self, **kwargs)
-
-        self.deinit_lsa()
