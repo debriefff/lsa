@@ -22,6 +22,6 @@ class DBImproperlyConfigured(Exception):
         return u'Not enough data to work with data base: %s' % self.data
 
 
-class DBConnectionLost(Exception):
+class DBBackendIsNotConfigured(Exception):
     def __str__(self):
-        return u'No attribute <connection>. DB backend instance must have it'
+        return u'No any db settings provided'
