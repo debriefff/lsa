@@ -83,7 +83,7 @@ class LSA(object):
              desired_id: int value or None! (to save memory)
         """
 
-        # TODO: desired_id может быть числом, но переданным как строка, немного другая проверка нид
+        # TODO: desired_id может быть строкой, это норм
         if desired_id is not None:
             if not isinstance(desired_id, int):
                 raise exceptions.KeyTypeException(desired_id)
@@ -289,3 +289,10 @@ class LSA(object):
         self.D = helpers.insert_column_to_matrix(self.D, doc_coords)
 
         return new_key
+
+    def load_from_dump(self, t, s, d, words, keys):
+        self.T = t
+        self.S = s
+        self.D = d
+        self.words = words
+        self.keys = keys
