@@ -11,15 +11,16 @@ import exceptions
 
 
 class LSA(object):
-    def __init__(self, latent_dimensions):
+    def __init__(self, latent_dimensions, use_stemming=True, decimals=2):
         """
         Args:
            latent_dimensions: numbers of dimensions which provide reliable indexing (but less than number of
             indexed words). For visualisation enough 2 dem.
 
         """
-        # TODO: ввести параметр окрегления координат (сейчас 2 цифры после запятой)
-        # TODO: ввести параметр юзать стемминг или нет
+
+        self.use_stemming = use_stemming
+        self.decimals = decimals
         self.latent_dimensions = latent_dimensions
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
@@ -47,7 +48,8 @@ class LSA(object):
         document = helpers.lower_document(document)
         document = self.exclude_trash(document)
         document = self.exclude_stops(document)
-        document = self.stem_document(document)
+        if self.use_stemming:
+            document = self.stem_document(document)
         return document
 
     def check_latent_dimensions(self):
@@ -145,9 +147,9 @@ class LSA(object):
         T, S, D = np.linalg.svd(self.X, full_matrices=True)
 
         # numpy returns S as flat array of diagonal elements (+ round):
-        self.T = np.matrix(T.round(decimals=2))
-        self.S = np.matrix(np.diag(S).round(decimals=2))
-        self.D = np.matrix(D.round(decimals=2))
+        self.T = np.matrix(T.round(decimals=self.decimals))
+        self.S = np.matrix(np.diag(S).round(decimals=self.decimals))
+        self.D = np.matrix(D.round(decimals=self.decimals))
 
     def truncate_matrices(self):
         """ Truncate T, S and D matrices within latent_dimensions number
@@ -167,7 +169,7 @@ class LSA(object):
     def recalculate_base_matrix(self):
         """ Rebuilding matrix X after truncating T, S and D """
 
-        self.X = np.matrix((self.T * self.S * self.D).round(decimals=2))
+        self.X = np.matrix((self.T * self.S * self.D).round(decimals=self.decimals))
 
     def build_semantic_space(self, manage_unique=True):
         if manage_unique:
@@ -241,7 +243,7 @@ class LSA(object):
         # If term is in the query its coordinate 1, else 0. Simple!
         Xq = [1 if x in doc_word_positions else 0 for x in range(len(self.words))]
         Dq = np.matrix(Xq) * self.T * self.S.I
-        return np.array(Dq.tolist()[0]).round(decimals=2)
+        return np.array(Dq.tolist()[0]).round(decimals=self.decimals)
 
     def find_similar_documents(self, doc_coords, limit=100):
         """  Calculate cosine distances between docs and the given doc

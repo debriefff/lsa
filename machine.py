@@ -21,8 +21,10 @@ class SearchMachine():
     KEYS_INDEX_NAME = 'keys.json'
 
     def __init__(self, latent_dimensions, index_backend, keep_index_info, default_search_limit=100, db_backend=None,
-                 db_credentials=None, tables_info=None, manage_unique=True):
+                 db_credentials=None, tables_info=None, manage_unique=True, use_stemming=True, decimals=2):
         self.lsa = None
+        self.use_stemming = use_stemming
+        self.decimals = decimals
         self.default_search_limit = default_search_limit
         self.latent_dimensions = latent_dimensions
         self.manage_unique = manage_unique
@@ -34,7 +36,7 @@ class SearchMachine():
     def init_lsa(self):
         """ Create LSA instance not from dump """
 
-        self.lsa = core.LSA(self.latent_dimensions)
+        self.lsa = core.LSA(self.latent_dimensions, use_stemming=self.use_stemming, decimals=self.decimals)
 
     def deinit_lsa(self):
         """ Delete created LSA instance """
