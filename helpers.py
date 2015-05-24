@@ -56,4 +56,3 @@ def import_from_package_and_module(path):
     cls_name, other = parts[-1], '.'.join(parts[:-1])
     mod = importlib.import_module(other)
     return getattr(mod, cls_name)
-

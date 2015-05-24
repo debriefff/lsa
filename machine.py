@@ -102,8 +102,8 @@ class SearchMachine():
         self.build_index()
 
     @with_manage_lsa_instance
-    def search(self, query, limit=None):
-        return self.lsa.search(query, limit=limit or self.default_search_limit)
+    def search(self, query, limit=None, with_distances=False):
+        return self.lsa.search(query, with_distances, limit=limit or self.default_search_limit)
 
     @with_manage_lsa_instance
     def update_index_with_doc(self, document, desired_id=None):

@@ -25,7 +25,7 @@ class LSA(object):
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
         self.stemmer = SnowballStemmer(language="russian")
-        self.docs = {}  # keeps documents and their ids  TODO: чистить, как только становится ненужным
+        self.docs = {}  # keeps documents and their ids
         self.words = []  # keeps indexed words
         self.keys = []  # keeps documents ids
 
@@ -242,7 +242,7 @@ class LSA(object):
         Dq = np.matrix(Xq) * self.T * self.S.I
         return np.array(Dq.tolist()[0]).round(decimals=self.decimals)
 
-    def find_similar_documents(self, doc_coords, limit=100):
+    def find_similar_documents(self, doc_coords, limit=100, with_distances=False):
         """  Calculate cosine distances between docs and the given doc
         :param
             doc_coords:
@@ -257,21 +257,22 @@ class LSA(object):
                      range(self.D.shape[1])]
 
         sorted_distanses = sorted(distances, key=operator.itemgetter(1))
-        result = [doc_id for doc_id, dist in sorted_distanses[:limit]]
-        return result
+        if with_distances:
+            return sorted_distanses[:limit]
+        else:
+            return [doc_id for doc_id, dist in sorted_distanses[:limit]]
 
-    def search(self, query, limit=100):
+    def search(self, query, with_distances=False, limit=100):
         """ We consider that retrieval query is like a new document.
             Calculate coordinates and compare with other docs
         """
 
-        # TODO добавить функционал возвращения идентификаторов с дистанциями
         q = self.prepare_document(query)
         pd_coords = self.make_semantic_space_coords_for_new_doc(q)
         if pd_coords is None:
             print('No one word from query is in semantic space')
             return None
-        return self.find_similar_documents(pd_coords, limit)
+        return self.find_similar_documents(pd_coords, limit, with_distances)
 
     def update_space_with_document(self, document, desired_id=None):
         """ Folding-in a new document into semantic space
