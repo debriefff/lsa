@@ -118,4 +118,4 @@ class SearchMachine():
 
     @with_manage_lsa_instance
     def draw_space(self, **kwargs):
-        self.lsa.draw_semantic_space(self, **kwargs)
+        self.lsa.draw_semantic_space(**kwargs)
