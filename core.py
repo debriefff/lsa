@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import math
 import collections
 import operator
 from random import choice
@@ -11,7 +12,7 @@ import exceptions
 
 
 class LSA(object):
-    def __init__(self, latent_dimensions, use_stemming=True, decimals=2):
+    def __init__(self, latent_dimensions, use_stemming=True, use_tf_idf=True, decimals=2):
         """
         Args:
            latent_dimensions: numbers of dimensions which provide reliable indexing (but less than number of
@@ -19,6 +20,7 @@ class LSA(object):
 
         """
 
+        self.use_tf_idf = use_tf_idf
         self.use_stemming = use_stemming
         self.decimals = decimals
         self.latent_dimensions = latent_dimensions
@@ -120,6 +122,36 @@ class LSA(object):
         self.manage_repeating_words()
         return key
 
+    def tf_idf_transform(self):
+        """ TF-IDF transformation. Improves accuracy
+
+            tf - term frequency. how many terms in each document (sum of columns)
+
+            ids - inverse document frequency number. of documents which contains term
+            (for each elem of each line: if elem is not zero sum one to counter)
+        """
+
+        XL = self.X.tolist()
+        terms_in_doc = np.sum(XL, axis=0)
+
+        docs_with_term = []
+        for row in XL:
+            cnt = 0
+            for elem in row:
+                if elem != 0:
+                    cnt += 1
+            docs_with_term.append(cnt)
+
+        rows, cols = self.X.shape
+        docs_number = cols
+        for i in range(rows):
+            for j in range(cols):
+                tf = XL[i][j] / terms_in_doc[j]
+                idf = math.log(float(docs_number) / docs_with_term[i])
+                XL[i][j] = tf * idf
+
+        self.X = np.matrix(np.array(XL).round(decimals=self.decimals))
+
     def build_base_matrix(self):
         """
         Terms-to-documents matrix:
@@ -170,6 +202,8 @@ class LSA(object):
         if manage_unique:
             self.manage_unique_words()
         self.build_base_matrix()
+        if self.use_tf_idf:
+            self.tf_idf_transform()
         self.clear_self_docs()
         self.svd()
         self.truncate_matrices()
