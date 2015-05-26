@@ -4,11 +4,12 @@ import collections
 import operator
 from random import choice
 from stops import STOP_WORDS, EXCLUDE_CHARS
-from nltk.stem import SnowballStemmer
+# from nltk.stem import SnowballStemmer
 from scipy.spatial import distance
 import numpy as np
 import helpers
 import exceptions
+from custom_stemmer import porter
 
 
 class LSA(object):
@@ -26,7 +27,8 @@ class LSA(object):
         self.latent_dimensions = latent_dimensions
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
-        self.stemmer = SnowballStemmer(language="russian")
+        # self.stemmer = SnowballStemmer(language="russian")
+        self.stemmer = porter.Stemmer()
         self.docs = {}  # keeps documents and their ids
         self.words = []  # keeps indexed words
         self.keys = []  # keeps documents ids
