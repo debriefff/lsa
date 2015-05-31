@@ -295,8 +295,7 @@ class LSA(object):
         sorted_distanses = sorted(distances, key=operator.itemgetter(1))
         if with_distances:
             return sorted_distanses[:limit]
-        else:
-            return [doc_id for doc_id, dist in sorted_distanses[:limit]]
+        return [doc_id for doc_id, dist in sorted_distanses[:limit]]
 
     def search(self, query, with_distances=False, limit=100):
         """ We consider that retrieval query is like a new document.

@@ -28,9 +28,9 @@ class Stemmer():
 
         pre = m.group(1)
         rv = m.group(2)
-        temp = Stemmer.PERFECTIVEGROUND.sub('', rv, 1)
 
         # step 1
+        temp = Stemmer.PERFECTIVEGROUND.sub('', rv, 1)
         if temp == rv:
             rv = Stemmer.REFLEXIVE.sub('', rv, 1)
             temp = Stemmer.ADJECTIVE.sub('', rv, 1)
