@@ -5,7 +5,7 @@ literature/
 venv/
 tst*.py
 test*.py
-semantic_space.png
-/fill
+#semantic_space.png
+#/fill
 little.db
 index/
