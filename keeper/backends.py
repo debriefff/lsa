@@ -2,14 +2,16 @@ import os
 import shutil
 import json
 import numpy as np
+from keeper import base
 
 
-class JsonIndexBackend():
+class JsonIndexBackend(base.BaseIndexBackend):
     def __init__(self, **keep_index_info):
         self.index_folder = keep_index_info.get('path_to_index_folder')
         self.manage_index_folder()
 
     def manage_index_folder(self):
+        # TODO: сделать проверку прав на запись и чтение в path_to_index_folder
         if not os.path.exists(self.index_folder):
             os.makedirs(self.index_folder)
 

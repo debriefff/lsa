@@ -4,7 +4,6 @@ import collections
 import operator
 from random import choice
 from stops import STOP_WORDS, EXCLUDE_CHARS
-# from nltk.stem import SnowballStemmer
 from scipy.spatial import distance
 import numpy as np
 import helpers
@@ -27,7 +26,6 @@ class LSA(object):
         self.latent_dimensions = latent_dimensions
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
-        # self.stemmer = SnowballStemmer(language="russian")
         self.stemmer = porter.Stemmer()
         self.docs = {}  # keeps documents and their ids
         self.words = []  # keeps indexed words
@@ -84,27 +82,20 @@ class LSA(object):
                 to_remove.append(word)
         self.words = list(set(self.words) - set(to_remove))
 
+    # TODO: метод, который бы просто говорил, занят ли такой desired_id уже или нет. без исключений
     def check_doc_key(self, desired_id):
         """ Returns key that will indicate the document in space. This key will be returns by search method.
             If external document_id is given ist uniqueness will be checked, if not - returns max existed id + 1
 
             :param
-             desired_id: int value or None! (to save memory)
+             desired_id: int value or string (int with prefix for example)
         """
 
-        if desired_id is not None:
-            if desired_id in self.keys:
-                raise exceptions.UniqueKeyException(desired_id)
-            return desired_id
+        if desired_id in self.keys:
+            raise exceptions.UniqueKeyException(desired_id)
+        return desired_id
 
-        try:
-            key = max(self.keys) + 1
-        # if sequence is empty
-        except ValueError:
-            key = 0
-        return key
-
-    def add_document(self, raw_document, desired_id=None):
+    def add_document(self, raw_document, desired_id):
         """ Adds given document in semantic space
 
         :param
@@ -204,9 +195,9 @@ class LSA(object):
         if manage_unique:
             self.manage_unique_words()
         self.build_base_matrix()
+        self.clear_self_docs()
         if self.use_tf_idf:
             self.tf_idf_transform()
-        self.clear_self_docs()
         self.svd()
         self.truncate_matrices()
 
@@ -278,6 +269,7 @@ class LSA(object):
         Dq = np.matrix(Xq) * self.T * self.S.I
         return np.array(Dq.tolist()[0]).round(decimals=self.decimals)
 
+    # TODO: поиск сходных не только по координатам, но и по id
     def find_similar_documents(self, doc_coords, limit=100, with_distances=False):
         """  Calculate cosine distances between docs and the given doc
         :param
@@ -302,6 +294,7 @@ class LSA(object):
             Calculate coordinates and compare with other docs
         """
 
+        # TODO добавить возможность сортировать от меньшей релевантности к большей
         q = self.prepare_document(query)
         pd_coords = self.make_semantic_space_coords_for_new_doc(q)
         if pd_coords is None:
@@ -314,10 +307,10 @@ class LSA(object):
             See add_document method for params and returns info
         """
 
-        clear_doc = self.prepare_document(document)
-        doc_coords = self.make_semantic_space_coords_for_new_doc(clear_doc)
         new_key = self.check_doc_key(desired_id)
         self.keys.append(new_key)
+        clear_doc = self.prepare_document(document)
+        doc_coords = self.make_semantic_space_coords_for_new_doc(clear_doc)
         self.D = helpers.insert_column_to_matrix(self.D, doc_coords)
 
         return new_key

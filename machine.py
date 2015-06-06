@@ -47,6 +47,8 @@ class SearchMachine():
         self.lsa = None
 
     def feed_from_db(self):
+        """ Manage tables_info dict adn grab data from database """
+
         # 'credentials' : { все для соединения в БД }
         # 'tables_info': {'table_name_1': {'fields': ('fname1', 'fname2', ...), 'pk_field_name': 'pk_field_name', 'prefix': 'd_', 'where': '...'}, 'table_name_2':{...}}
 
@@ -63,7 +65,7 @@ class SearchMachine():
                 desired_id = table_prefix + str(row[0]) if table_prefix else row[0]
                 self.feed_with_document(document, desired_id)
 
-    def feed_with_document(self, raw_document, desired_id=None):
+    def feed_with_document(self, raw_document, desired_id):
         """ Give individual document to LSA algorithm """
         return self.lsa.add_document(raw_document, desired_id)
 
@@ -109,7 +111,7 @@ class SearchMachine():
         return self.lsa.search(query, with_distances, limit=limit or self.default_search_limit)
 
     @with_manage_lsa_instance
-    def update_index_with_doc(self, document, desired_id=None):
+    def update_index_with_doc(self, document, desired_id):
         """ Use it to add a new document to already existed semantic space """
 
         ney_key = self.lsa.update_space_with_document(document, desired_id)

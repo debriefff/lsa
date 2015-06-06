@@ -2,6 +2,8 @@ import re
 
 
 class Stemmer():
+    """ Porter stemming algorithm for russian language """
+
     PERFECTIVEGROUND = re.compile(u"((ив|ивши|ившись|ыв|ывши|ывшись)|((?<=[ая])(в|вши|вшись)))$")
     REFLEXIVE = re.compile(u"(с[яь])$")
     ADJECTIVE = re.compile(u"(ее|ие|ые|ое|ими|ыми|ей|ий|ый|ой|ем|им|ым|ом|его|ого|ему|ому|их|ых|ую|юю|ая|яя|ою|ею)$")
