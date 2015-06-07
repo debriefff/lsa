@@ -32,7 +32,7 @@ class LSA(object):
         self.keys = []  # keeps documents ids
 
     def clear_self_docs(self):
-        self.docs = {}
+        self.docs = {}   # mb del self.doc
 
     def exclude_trash(self, document):
         for char in self.chars_to_exclude:
@@ -40,9 +40,12 @@ class LSA(object):
         return document
 
     def exclude_stops(self, document):
-        return [word for word in document.split(' ') if word not in self.stop_words]
+        return [word.strip() for word in document.split(' ') if word not in self.stop_words]
 
     def stem_document(self, document, return_text=False):
+        if not isinstance(document, list):
+            raise exceptions.StemArgException(document)
+
         # we need if w to avoid empty strings in results
         stemmed_words = [self.stemmer.stem(w) for w in document if w]
         if return_text:
@@ -168,6 +171,10 @@ class LSA(object):
 
     def svd(self):
         """ Singular Value Decomposition of base matrix """
+
+        x, y = self.X.shape
+        if not x or not y:
+            raise exceptions.SvdEmptyTarget
 
         T, S, D = np.linalg.svd(self.X, full_matrices=True)
 

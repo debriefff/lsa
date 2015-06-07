@@ -30,3 +30,24 @@ class DBBackendIsNotConfigured(Exception):
 class TooManyDimensionsToDraw(Exception):
     def __str__(self):
         return u'Method draw_semantic_space can be only used if latent_dimensions = 2'
+
+
+class StemArgException(TypeError):
+    def __init__(self, arg):
+        self.arg = arg
+
+    def __str__(self):
+        return u'First argument should be a list, not %s' % type(self.arg)
+
+
+class SvdEmptyTarget(Exception):
+    def __str__(self):
+        return u'SVD can not works with empty matrix'
+
+
+class TruncateMatrixError(Exception):
+    def __init__(self, data):
+        self.data = data
+
+    def __str__(self):
+        return u'Parameter limit should be positive. But %s got' % self.data

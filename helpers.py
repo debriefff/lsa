@@ -1,9 +1,13 @@
 import numpy as np
 import importlib
+import exceptions
 
 
 def truncate_columns(matrix, limit):
     """ Work with numpy matrices """
+
+    if limit < 1:
+        raise exceptions.TruncateMatrixError(limit)
 
     lst = []
     matrix = matrix.tolist()
@@ -13,6 +17,8 @@ def truncate_columns(matrix, limit):
 
 
 def truncate_rows(matrix, limit):
+    if limit < 1:
+        raise exceptions.TruncateMatrixError(limit)
     return matrix[:limit]
 
 
