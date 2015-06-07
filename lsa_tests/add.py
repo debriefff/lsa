@@ -1,6 +1,7 @@
 import unittest
 import string
 import random
+import exceptions
 from lsa_tests.base import EmptyLsaFixtureMixin, LsaFixtureMixin, HelpTestMethodsMixin
 
 
@@ -88,6 +89,12 @@ class CheckDocKey(EmptyLsaFixtureMixin, HelpTestMethodsMixin, unittest.TestCase)
         self.lsa.keys.append(self.test_key2)
         self.wrong_arg(self.test_key1, obj=self.lsa, method=self.method_name, exception=Exception)
         self.wrong_arg(self.test_key2, obj=self.lsa, method=self.method_name, exception=Exception)
+
+    def test_invalid_arg_types(self):
+        self.wrong_arg(35.8, obj=self.lsa, method=self.method_name, exception=exceptions.KeyTypeException)
+        self.wrong_arg([34, 45], obj=self.lsa, method=self.method_name, exception=exceptions.KeyTypeException)
+        self.wrong_arg({'key1': 18, 'key2': 'table_45'}, obj=self.lsa, method=self.method_name,
+                       exception=exceptions.KeyTypeException)
 
     def test_return(self):
         self.check_return_eq(self.test_key1, obj=self.lsa, method=self.method_name, compare_with=self.test_key1)

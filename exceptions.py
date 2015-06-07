@@ -11,7 +11,7 @@ class KeyTypeException(Exception):
         self.fail_id = fail_id
 
     def __str__(self):
-        return u'Desired id (%s) has invalid type. Only integers are allowed' % self.fail_id
+        return u'Desired id (%s) has invalid type. Only integers and stings are allowed' % self.fail_id
 
 
 class DBImproperlyConfigured(Exception):

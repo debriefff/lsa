@@ -13,7 +13,7 @@ class CoreManageUniqueWordsMethodTests(LsaFixtureMixin, unittest.TestCase):
         for key in self.lsa.docs.keys():
             while True:
                 tmp = ''.join([random.choice(string.ascii_letters) for x in range(30)])
-                if tmp not in self.lsa.docs[key]:
+                if tmp not in self.lsa.docs[key] and tmp not in self.unique_words:
                     self.unique_words[key] = tmp
                     break
 

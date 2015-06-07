@@ -93,6 +93,8 @@ class LSA(object):
             :param
              desired_id: int value or string (int with prefix for example)
         """
+        if not isinstance(desired_id, (int, str)):
+            raise exceptions.KeyTypeException(desired_id)
 
         if desired_id in self.keys:
             raise exceptions.UniqueKeyException(desired_id)
