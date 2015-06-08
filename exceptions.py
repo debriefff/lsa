@@ -51,3 +51,11 @@ class TruncateMatrixError(Exception):
 
     def __str__(self):
         return u'Parameter limit should be positive. But %s got' % self.data
+
+
+class DocumentDoesNotExist(Exception):
+    def __init__(self, data):
+        self.data = data
+
+    def __str__(self):
+        return u'Document with id (%s) does not exist in space' % self.data

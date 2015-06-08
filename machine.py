@@ -121,3 +121,9 @@ class SearchMachine():
     @with_manage_lsa_instance
     def draw_space(self, **kwargs):
         self.lsa.draw_semantic_space(**kwargs)
+
+    @with_manage_lsa_instance
+    def remove_document(self, doc_id):
+        """ Use to remove doc from already built semantic space """
+        self.lsa.remove_document(doc_id)
+        self.dump_semantic_space()

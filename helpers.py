@@ -39,7 +39,7 @@ def get_matrix_column(matrix, n):
 
 
 def insert_column_to_matrix(matrix, to_insrt):
-    """ Insert column into nampy matrix
+    """ Insert column into nampy matrix (to the end of matrix)
 
     Returns:
         type of return object - numpy.matrix

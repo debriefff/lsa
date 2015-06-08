@@ -17,4 +17,5 @@ res = sm.search('вручение Нобелевской премии', with_dis
 print(res)
 # res = sm.search('вручение Нобелевской премии')
 # print(res)
+sm.remove_document(doc_id=7)
 

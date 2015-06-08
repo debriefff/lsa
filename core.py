@@ -32,7 +32,7 @@ class LSA(object):
         self.keys = []  # keeps documents ids
 
     def clear_self_docs(self):
-        self.docs = {}   # mb del self.doc
+        self.docs = {}  # mb del self.doc
 
     def exclude_trash(self, document):
         for char in self.chars_to_exclude:
@@ -323,6 +323,19 @@ class LSA(object):
         self.D = helpers.insert_column_to_matrix(self.D, doc_coords)
 
         return new_key
+
+    def remove_document(self, doc_id):
+        """ Remove document from built space.
+
+        Raises:
+            DocumentDoesNotExist exception if doc_id is not wrong
+        """
+        if doc_id not in self.keys:
+            raise exceptions.DocumentDoesNotExist(doc_id)
+
+        col_num = self.keys.index(doc_id)
+        self.D = np.delete(self.D, col_num, 1)  # remove document from space
+        self.keys.remove(doc_id)  # remove its pk
 
     def load_from_dump(self, t, s, d, words, keys):
         self.T = t
