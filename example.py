@@ -17,5 +17,9 @@ res = sm.search('вручение Нобелевской премии', with_dis
 print(res)
 # res = sm.search('вручение Нобелевской премии')
 # print(res)
-sm.remove_document(doc_id=7)
+# sm.remove_document(doc_id=7)
+
+from fill import source
+for r in res:
+    print(source.docs[r[0]-1], r[1])
 

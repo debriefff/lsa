@@ -62,8 +62,7 @@ class LSA(object):
 
     def check_latent_dimensions(self):
         """ Check if entered by user latent dimensions (k) less than number of indexed words and documents """
-
-        self.latent_dimensions = min(self.latent_dimensions, len(self.words), len(self.keys))
+        self.latent_dimensions = min(self.latent_dimensions, len(self.words), len(self.keys) - 1)
 
     def manage_repeating_words(self):
         """ List with indexed words should not have repeated entries """
