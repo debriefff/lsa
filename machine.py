@@ -92,7 +92,6 @@ class SearchMachine():
     def build_index(self):
         self.init_lsa()
         self.feed_from_db()
-
         self.build_semantic_space()
         self.dump_semantic_space()
 

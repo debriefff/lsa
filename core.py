@@ -159,12 +159,15 @@ class LSA(object):
 
         """
 
+        counters = {}
+        for key in self.keys:
+            counters[key] = collections.Counter(self.docs[key])
+
         lst = []
         for word in self.words:
             row = []
             for key in self.keys:
-                # TODO: Можно не создавать на каждом шаге объекты-счетчики, сделать это только один раз
-                counter = collections.Counter(self.docs[key])
+                counter = counters[key]
                 row.append(counter[word])
             lst.append(row)
 

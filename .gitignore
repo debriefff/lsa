@@ -8,3 +8,7 @@ semantic_space.png
 #/fill
 little.db
 index/
+index_*/
+test*.py
+some.txt
+*.sql
