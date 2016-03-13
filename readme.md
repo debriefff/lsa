@@ -81,10 +81,11 @@ If `with_distances` is True the method returns list of tuples. Each tuple is pai
 
 *Add document to built semantic space*. Building space is not very fast process. There is apportunity to add document to search index without full rebuilding.
 
-    sm.update_space_with_document(document, desired_id=None)
+    sm.update_space_with_document(document, desired_id)
 
 `document` - raw document text.
-`desired_id` - id of document to return in `search` method. Value should be unique. Primary key from database table record is the most suitable value.
+
+`desired_id` - id of document to return in `search` method. Value should be unique. Primary key from database table record is the most suitable value.  
 
 
 
