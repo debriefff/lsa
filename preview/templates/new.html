@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Latent Semantic Search</title>
+
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <a href="{{url_for('news')}}">Назад</a>
+        <div class="col-lg-12">
+            <h3>{{new.0}}</h3>
+
+            <p>{{new.1|safe}}</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
