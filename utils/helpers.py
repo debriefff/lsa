@@ -1,6 +1,6 @@
-import numpy as np
 import importlib
-import exceptions
+import numpy as np
+from utils import exceptions
 
 
 def truncate_columns(matrix, limit):

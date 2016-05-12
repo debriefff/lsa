@@ -1,17 +1,16 @@
-# -*- coding: UTF-8 -*-
 import math
+
 import collections
-import operator
-from random import choice
-from stops import STOP_WORDS, EXCLUDE_CHARS
-from scipy.spatial import distance
 import numpy as np
-import helpers
-import exceptions
+import operator
 from custom_stemmer import porter
+from random import choice
+from scipy.spatial import distance
+from utils import helpers, exceptions
+from utils.stops import STOP_WORDS, EXCLUDE_CHARS
 
 
-class LSA(object):
+class Space(object):
     def __init__(self, latent_dimensions, use_stemming=True, use_tf_idf=True, decimals=2):
         """
         Args:

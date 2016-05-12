@@ -1,34 +1,16 @@
-1) В подготовленных документах появляются пустые строки ''   +
-
-В LSA-класс нужно добавить следующий функционал:
-0) Долбанный поиск доделать (а точнее сравнение документов)    +++
-1) Апдейт пространства документом  +
-2) Апдейт пространства термов (отложим пока)
-3) Удаленеи документа из индекса(который пространство) (отложим пока)
-4) Строить пространство из дампа - просто взять входные аргументы (матрицы) и создать собственные атрибуты
-5) Нормализация матрицы термов-документов перед преобразованием
-6) Собственная реализация алгоритма Портера
-7) Проверять уникальность ключей и поднимать исключения в случае чего  +
-
-Сделать интерфейс (сторонний класс), который умеет
-1) Строить пространство:
-    1. Создавать инстанс LSA-класса с нуля
-    2. Брать данные из БД (MySQL, SQLite, PostgreSQL)
-    3. Брать документы напрямую
-    4. Скармливать инстансу документы
-2) Дампить семантическое пространство (запаковывать все в json и на диск)
-3) Поднимать данные из дампа и отдавать их соответствующему классу в инстансе
-4) Передавать все остальные команды в инстанс (апдейты, удаление документа) + необходимые доп действия (например после удаления документа из индекса)
-
-
-На ачивку:
-1) Сделать обертку для django
-
-
-По оптимизации:
-1) не понятно, зачем хранить self.X после построения пространства
-2) понавтыкать итераторов
-3) не понятно, зачем хранить self.docs после построения пространства. это ест слишком много памяти
-
-По читаемости и красоте:
-1) Поменять некоторые имена переменных, чтобы разграничить raw docs и очищенные от треша и прошедшие стемминг документы
+- Decrease connectivity between keeper/DB-backend modules and search machine
+- Fix mechanist of plugging DB and keeper modules. Fixed names for built-in ones + custom classes as params
+- Divide SearchMachine into SearchMachine and IndexerMachine
+- Performance improvement
+    - Check matrix handling
+    - may be implement parallel matrix manipulations (multiplication, transposition)
+    - the more iterators, the more pink pony
+- Features
+    - ability to provide full sql query for DB backend + simplified mode (just table name and id field)
+    - ability to provide custom stop words collections
+    - more stemmers from nltk library
+    - normalizers from nltk library
+    - improve search algorithm (calculate distances to part of space, not to any document)
+    - html cleaner
+    - other doc types support
+    - limit search results

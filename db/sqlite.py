@@ -1,6 +1,7 @@
 import sqlite3
-import exceptions
+
 from db import base
+from utils import exceptions
 
 
 class SQLiteBackend(base.DataBaseBackend):
