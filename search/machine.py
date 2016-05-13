@@ -1,6 +1,6 @@
-from indexer import core
-from utils import helpers, exceptions
-from utils.decorators import with_manage_space_instance
+from lsa.indexer import core
+from lsa.utils import helpers, exceptions
+from lsa.utils.decorators import with_manage_space_instance
 
 
 # db.mysql.MySQLBackend

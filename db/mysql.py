@@ -1,6 +1,7 @@
 import pymysql.cursors
-from db import base
-from utils import exceptions
+
+from lsa.db import base
+from lsa.utils import exceptions
 
 
 class MySQLBackend(base.DataBaseBackend):

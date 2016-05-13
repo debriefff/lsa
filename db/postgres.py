@@ -1,7 +1,7 @@
 import psycopg2
 
-from db import base
-from utils import exceptions
+from lsa.db import base
+from lsa.utils import exceptions
 
 
 class PostgreSQLBackend(base.DataBaseBackend):

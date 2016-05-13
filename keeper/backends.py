@@ -1,8 +1,10 @@
+import json
 import os
 import shutil
-import json
+
 import numpy as np
-from keeper import base
+
+from lsa.keeper import base
 
 
 class JsonIndexBackend(base.BaseIndexBackend):

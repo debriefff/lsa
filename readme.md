@@ -4,15 +4,15 @@ Python based semantic full-text search engine.
 
 Classic full-text search systems use similar algorithms for index building and search and ther have foundamental problems. They are: 
 
-1. Synonymy - description somethins usind different words  
+1. Synonymy - description something using different words
 
 2. Polysemy - one word has different meanings in different contexts  
 
 3. Ignoring semantic relations between terms in document and documents in collection  
 
-The main project idea is to provide full-text search withous described shortcoming using [LSI algorithms](https://en.wikipedia.org/wiki/Latent_semantic_indexing). The engine should be able to understand hidden (latent) semantic relations between terms in document. Desired documents shoult be in search results even they include no words from search query.
+The main project idea is to provide full-text search without described shortcoming using [LSI algorithms](https://en.wikipedia.org/wiki/Latent_semantic_indexing). The engine should be able to understand hidden (latent) semantic relations between terms in document. Desired documents shoult be in search results even they include no words from search query.
 
-Also popular text search solution works as client-servers. This projects is plugguble module with easy to use API for any python based projects.
+Also popular text search solution works as client-servers. This projects is pluggable module with easy to use API for any python based projects.
 
 ### Architecture
 
@@ -28,14 +28,19 @@ Main parts are:
 
 ### Usage
 
+Add search engine as a git-submodule to your project. I know this is not pretty awesome, pypi-package will be added soon
+
+    git submodule add https://github.com/Skycker/lsa
+
+
 Make instance of `SearchMachine` class with exact settings and run its methods. The institutionalization process doesn't start any heavy computations. Feel free to make class instance as many times as you need. 
 
 ```
-from machine import SearchMachine
+from lsa.search.machine import SearchMachine
 
-sm = SearchMachine(latent_dimensions=150, index_backend='keeper.backends.JsonIndexBackend',
+sm = SearchMachine(latent_dimensions=150, index_backend='lsa.keeper.backends.JsonIndexBackend',
                    keep_index_info={'path_to_index_folder': 'index'},
-                   db_backend='db.mysql.MySQLBackend',
+                   db_backend='lsa.db.mysql.MySQLBackend',
                    db_credentials={'db_name': 'news', 'user': 'user', 'password': 'user_big_password'},
                    tables_info={
                        'news_news': {'fields': ('title', 'text'), 'pk_field_name': 'id', 'prefix': '', 'where': 'id < 300'}
@@ -51,7 +56,7 @@ print(res)
 
 ### Methods
 
-*Buld index*. Make semantic space and save it on disk with choosen index-backend. Data will be taken from DB according to provided settings.
+*Build index*. Make semantic space and save it on disk with choosen index-backend. Data will be taken from DB according to provided settings.
 
     sm.build_index()
 

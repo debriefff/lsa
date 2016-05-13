@@ -1,13 +1,14 @@
-import math
-
 import collections
-import numpy as np
+import math
 import operator
-from custom_stemmer import porter
 from random import choice
+
+import numpy as np
 from scipy.spatial import distance
-from utils import helpers, exceptions
-from utils.stops import STOP_WORDS, EXCLUDE_CHARS
+
+from lsa.custom_stemmer import porter
+from lsa.utils import helpers, exceptions
+from lsa.utils.stops import STOP_WORDS, EXCLUDE_CHARS
 
 
 class Space(object):
