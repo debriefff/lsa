@@ -1,18 +1,17 @@
-import collections
 import math
-import operator
-from random import choice
 
+import collections
 import numpy as np
-from scipy.spatial import distance
-
+import operator
 from lsa.custom_stemmer import porter
 from lsa.utils import helpers, exceptions
 from lsa.utils.stops import STOP_WORDS, EXCLUDE_CHARS
+from random import choice
+from scipy.spatial import distance
 
 
 class Space(object):
-    def __init__(self, latent_dimensions, use_stemming=True, use_tf_idf=True, decimals=2):
+    def __init__(self, latent_dimensions, relevance_diameter_threshold, use_stemming, use_tf_idf, decimals):
         """
         Args:
            latent_dimensions: numbers of dimensions which provide reliable indexing (but less than number of
@@ -23,6 +22,7 @@ class Space(object):
         self.use_tf_idf = use_tf_idf
         self.use_stemming = use_stemming
         self.decimals = decimals
+        self.relevance_diameter_threshold = relevance_diameter_threshold
         self.latent_dimensions = latent_dimensions
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
@@ -280,6 +280,22 @@ class Space(object):
         Dq = np.matrix(Xq) * self.T * self.S.I
         return np.array(Dq.tolist()[0]).round(decimals=self.decimals)
 
+    def filter_distances(self, distances):
+        """ Every document has some distance to the search query, even irrelevant
+        This method takes relevant documents using calculated values of distance
+
+        :param
+            distances - array of float values of distances between documents and query
+        """
+
+        if not distances:
+            return list()
+
+        diameter = max(*distances) - min(*distances)
+        threshold = diameter * self.relevance_diameter_threshold
+        print(max(*distances), min(*distances), diameter, threshold)
+        return [d for d in distances if d / diameter < threshold]
+
     # TODO: поиск сходных не только по координатам, но и по id
     def find_similar_documents(self, doc_coords, limit=100, with_distances=False):
         """  Calculate cosine distances between docs and the given doc
@@ -292,13 +308,18 @@ class Space(object):
             A sorted tuple with ids of relevant documents. The most relevant doc is the first
         """
 
-        distances = [(self.keys[i], distance.cosine(helpers.get_matrix_column(self.D, i), doc_coords)) for i in
-                     range(self.D.shape[1])]
+        results = []
+        for i in range(self.D.shape[1]):
+            d = distance.cosine(helpers.get_matrix_column(self.D, i), doc_coords)
+            if not np.isnan(d) and d > 0:
+                results.append((self.keys[i], d))
 
-        sorted_distanses = sorted(distances, key=operator.itemgetter(1))
+        relevant_distances = self.filter_distances([d[1] for d in results])
+        relevant_results = [r for r in results if r[1] in relevant_distances]
+        sorted_results = sorted(relevant_results, key=operator.itemgetter(1))
         if with_distances:
-            return sorted_distanses[:limit]
-        return [doc_id for doc_id, dist in sorted_distanses[:limit]]
+            return sorted_results[:limit]
+        return [doc_id for doc_id, dist in sorted_results[:limit]]
 
     def search(self, query, with_distances=False, limit=100):
         """ We consider that retrieval query is like a new document.

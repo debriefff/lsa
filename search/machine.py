@@ -20,12 +20,13 @@ class SearchMachine():
 
     def __init__(self, latent_dimensions, index_backend, keep_index_info, default_search_limit=100, db_backend=None,
                  db_credentials=None, tables_info=None, manage_unique=True, use_stemming=True, use_tf_idf=True,
-                 decimals=2):
+                 decimals=2, relevance_diameter_threshold=0.1):
         self.space = None
         self.use_tf_idf = use_tf_idf
         self.use_stemming = use_stemming
         self.decimals = decimals
         self.default_search_limit = default_search_limit
+        self.relevance_diameter_threshold = relevance_diameter_threshold
         self.latent_dimensions = latent_dimensions
         self.manage_unique = manage_unique
         if db_backend and db_credentials and tables_info:
@@ -37,7 +38,7 @@ class SearchMachine():
         """ Create LSA instance not from dump """
 
         self.space = core.Space(self.latent_dimensions, use_stemming=self.use_stemming, use_tf_idf=self.use_tf_idf,
-                                decimals=self.decimals)
+                                decimals=self.decimals, relevance_diameter_threshold=self.relevance_diameter_threshold)
 
     def deinit_space(self):
         """ Delete created LSA instance """
