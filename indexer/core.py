@@ -293,7 +293,6 @@ class Space(object):
 
         diameter = max(*distances) - min(*distances)
         threshold = diameter * self.relevance_diameter_threshold
-        print(max(*distances), min(*distances), diameter, threshold)
         return [d for d in distances if d / diameter < threshold]
 
     # TODO: поиск сходных не только по координатам, но и по id
