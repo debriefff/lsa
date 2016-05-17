@@ -11,7 +11,7 @@ from scipy.spatial import distance
 
 
 class Space(object):
-    def __init__(self, latent_dimensions, relevance_diameter_threshold, use_stemming, use_tf_idf, decimals):
+    def __init__(self, latent_dimensions, relevance_radius_threshold, use_stemming, use_tf_idf, decimals):
         """
         Args:
            latent_dimensions: numbers of dimensions which provide reliable indexing (but less than number of
@@ -22,7 +22,7 @@ class Space(object):
         self.use_tf_idf = use_tf_idf
         self.use_stemming = use_stemming
         self.decimals = decimals
-        self.relevance_diameter_threshold = relevance_diameter_threshold
+        self.relevance_radius_threshold = relevance_radius_threshold
         self.latent_dimensions = latent_dimensions
         self.stop_words = STOP_WORDS
         self.chars_to_exclude = EXCLUDE_CHARS
@@ -291,9 +291,9 @@ class Space(object):
         if not distances:
             return list()
 
-        diameter = max(*distances) - min(*distances)
-        threshold = diameter * self.relevance_diameter_threshold
-        return [d for d in distances if d / diameter < threshold]
+        radius = max(*distances)
+        threshold = radius * self.relevance_radius_threshold
+        return [d for d in distances if d < threshold]
 
     # TODO: поиск сходных не только по координатам, но и по id
     def find_similar_documents(self, doc_coords, limit=100, with_distances=False):
